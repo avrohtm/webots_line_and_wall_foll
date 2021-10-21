@@ -1,0 +1,160 @@
+from controller import Robot
+
+robot = Robot()
+
+timestep = int(robot.getBasicTimeStep())
+
+leftmotor = robot.getDevice('motor_1')
+rightmotor = robot.getDevice('motor_2')
+leftmotor.setPosition(float('inf'))
+rightmotor.setPosition(float('inf'))
+
+jakir = robot.getDevice('ds_left')
+jakan = robot.getDevice('ds_right')
+jadep = robot.getDevice('ds_front')
+
+
+irl2 = robot.getDevice('IRL2')
+irl1 = robot.getDevice('IRL1')
+ircl = robot.getDevice('IRCL')
+ircr = robot.getDevice('IRCR')
+irr1 = robot.getDevice('IRR1')
+irr2 = robot.getDevice('IRR2')
+
+
+irl2.enable(timestep)
+irl1.enable(timestep)
+ircl.enable(timestep)
+ircr.enable(timestep)
+irr1.enable(timestep)
+irr2.enable(timestep)
+jakir.enable(timestep)
+jakan.enable(timestep)
+jadep.enable(timestep)
+
+gerak = 1
+
+
+def Go():
+    rightmotor.setVelocity(3)
+    leftmotor.setVelocity(3)
+def kiri():
+    rightmotor.setVelocity(5)
+    leftmotor.setVelocity(-5)
+def kanan():
+    rightmotor.setVelocity(-5)
+    leftmotor.setVelocity(5)
+def diam():
+    rightmotor.setVelocity(0)
+    leftmotor.setVelocity(0)
+    
+    
+def sebelum():
+    if IR_Kanan > 1100 and IR_Kiri < 1100:
+        kiri()
+        print("Kondisi 1_1")
+    elif IRT < 1200:
+        Go()
+        print("Kondisi 1_2")
+    elif IR_Kanan < 1400 and IR_Kiri > 1400:
+        kanan()
+        print("Kondisi 1_3")
+    elif IRL_1 < 380:
+        kiri()
+        print("Kondisi 1_4")
+    
+def dinding():
+    if (IRT > 3500 and jaki_val < 1000) or (IRT > 3500 and jaka_val < 1000):
+        Go()
+    print("KONDISI 2")
+        
+def setelah_gerak():
+    if IR_Kanan > 1400 and IR_Kiri < 1400:
+        kiri()
+        print("Kondisi 3_1")  
+    elif IR_Kiri < 1400 and IR_Kanan > 1400:
+        kanan()
+        print("Kondisi 3_2")
+    elif IRR_1 < 380 :
+        kanan()
+        print("Kondisi 3_3")
+    elif jade_val > 200:
+        Go()
+        print("Kondisi 3_4")
+    elif jade_val < 200:
+        diam()
+        print("Kondisi 3_5")
+    else :
+        Go()
+        print("Kondisi 3_6")
+        
+
+def pertigaan():
+    if (IRR_1 < 750 and IR_Kanan > 800) or (IRL_1 < 250 and IR_Kiri < 370):
+        kiri()
+        print("khusus")
+    elif IRT < 1200:
+        Go()
+      
+def finish():
+    if (IRL_1 < 800 and IR_Kiri > 600) or (IRR_1 < 250 and IR_Kanan < 370):
+        kanan()
+        print("khusus")
+    elif IR_Kiri < 1400 and IR_Kanan > 1400:
+        kanan()
+        print("Kondisi 4_1")
+    elif IR_Kiri < 1400 or IR_Kanan > 1400:
+        kiri()
+        print("Kondisi 4_2")
+    elif IRR_1 < 550 and IRR_1 > 380 and IRL_1 < 650 and IRL_1 > 350 and jade_val > 200:
+        Go()   
+        print("Kondisi 4_3")
+    elif jade_val < 200:
+        diam()
+        print("Kondisi 4_4")
+    elif jade_val < 600:
+        diam()    
+        print("Kondisi 4_5")
+
+
+while robot.step(timestep) != -1:  
+    rightmotor.setVelocity(11)
+    leftmotor.setVelocity(11)
+    
+     
+    irl2_val = irl2.getValue()
+    irl1_val = irl1.getValue()
+    ircl_val = ircl.getValue()
+    ircr_val = ircr.getValue()
+    irr1_val = irr1.getValue()
+    irr2_val = irr2.getValue()
+    jaka_val = jakan.getValue()
+    jaki_val = jakir.getValue()
+    jade_val = jadep.getValue()
+
+    IRR_1 = irr1_val + irr2_val
+    IRL_1 = irl1_val + irl2_val
+    IR_Kanan = ircr_val + irr1_val + irr2_val
+    IR_Kiri = ircl_val + irl1_val + irl2_val
+    IR_Tengah = ircr_val + ircl_val
+    IRT = IR_Kanan + IR_Kiri
+    
+    
+    print ('{:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} {:.2f}'.format(ircl_val, jaka_val, jaki_val, jade_val, IRL_1, IR_Tengah, IRR_1, IR_Kiri, IR_Kanan, IRT))
+    
+    if gerak == 1:
+        sebelum()
+        dinding()
+        if IRT < 3000 and jaki_val < 1000:  
+            gerak = 2 
+            print("lanjutan")
+    elif gerak == 2:
+        setelah_gerak()
+        #pertigaan()
+        if jaka_val < 900:           
+            gerak = 3
+    elif gerak == 3:
+        pertigaan()
+        finish()
+        diam()
+        
